@@ -11,24 +11,35 @@
       />
     </div>
     <ul class="list-reset">
-      <li v-for="post in filteredPosts" :key="post.id" class="mb-4">
-        <div class="bg-white rounded shadow p-4">
-          <h2 class="text-xl font-bold mb-2 text-black">{{ post.title }}</h2>
-          <p class="text-gray-700 mb-4">{{ post.body }}</p>
-          <div class="flex justify-between items-center">
-            <div v-if="post.comments" class="text-gray-600 text-sm">
-              Коментарів: {{ post.comments.length }}
+      <TransitionGroup name="list" tag="li">
+        <li v-for="post in filteredPosts" :key="post.id" class="mb-4">
+          <div class="bg-white rounded shadow p-4">
+            <h2 class="text-xl font-bold mb-2 text-black">{{ post.title }}</h2>
+            <p class="text-gray-700 mb-4">{{ post.body }}</p>
+            <div class="flex justify-between items-center">
+              <div v-if="post.comments" class="text-gray-600 text-sm">
+                Коментарів: {{ post.comments.length }}
+              </div>
+              <button
+                @click="showStatistics(post.id)"
+                class="bg-green-700 text-white rounded px-4 py-2"
+              >
+                Показати статистику
+              </button>
             </div>
-            <button
-              @click="showStatistics(post.id)"
-              class="bg-green-700 text-white rounded px-4 py-2"
-            >
-              Показати статистику
-            </button>
           </div>
-        </div>
-      </li>
+        </li>
+      </TransitionGroup>
     </ul>
+    <div class="flex justify-center">
+      <p
+        class="bg-amber-400 hover:bg-amber-500 w-10 h-10 m-2 flex items-center justify-center rounded text-black cursor-pointer transition-all"
+        @click="goToPage(i)"
+        v-for="i in numberOfPages"
+      >
+        {{ i }}
+      </p>
+    </div>
     <div
       :class="selectedPostId ? 'block' : 'hidden'"
       class="fixed top-0 left-0 right-0 bottom-0 z-50 overflow-y-auto"
@@ -66,13 +77,21 @@ export default {
       filterText: "",
       selectedPostId: null,
       myChart: null,
+      currentPage: 1,
+      postsPerPage: 10,
     };
   },
   computed: {
     filteredPosts() {
-      return this.posts.filter((post) =>
+      const startIndex = (this.currentPage - 1) * this.postsPerPage;
+      const endIndex = startIndex + this.postsPerPage;
+      const post = this.posts.slice(startIndex, endIndex);
+      return post.filter((post) =>
         post.title.toLowerCase().includes(this.filterText.toLowerCase())
       );
+    },
+    numberOfPages() {
+      return Math.ceil(this.posts.length / this.postsPerPage);
     },
   },
   mounted() {
@@ -109,6 +128,14 @@ export default {
         },
       });
     },
+    goToPage(page) {
+      this.currentPage = page;
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+    },
     closeStatistics() {
       this.myChart.destroy();
       this.selectedPostId = null;
@@ -134,5 +161,13 @@ export default {
     right: 20px;
     cursor: pointer;
   }
+}
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
 }
 </style>
