@@ -49,6 +49,7 @@
 <script>
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
 export default {
   name: "MapView",
   data() {
@@ -58,6 +59,7 @@ export default {
       lat: null,
       lng: null,
       nameMarker: null,
+      markers: [],
     };
   },
   mounted() {
@@ -67,6 +69,13 @@ export default {
         'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
       maxZoom: 18,
     }).addTo(this.map);
+    if (localStorage.getItem("markers")) {
+      this.markers = JSON.parse(localStorage.getItem("markers"));
+      this.markers.forEach((marker) => {
+        const markerOnMap = L.marker([marker.lat, marker.lng]).addTo(this.map);
+        markerOnMap.bindTooltip(marker.nameMarker);
+      });
+    }
   },
   methods: {
     openModal(event) {
@@ -84,6 +93,13 @@ export default {
     addMarker() {
       const marker = L.marker([this.lat, this.lng]).addTo(this.map);
       marker.bindTooltip(this.nameMarker);
+      this.markers.push({
+        name: this.nameMarker,
+        lat: this.lat,
+        lng: this.lng,
+      });
+      localStorage.setItem("markers", JSON.stringify(this.markers));
+      console.log();
       this.lng = null;
       this.lat = null;
       this.nameMarker = null;

@@ -36,6 +36,7 @@
         class="bg-amber-400 hover:bg-amber-500 w-10 h-10 m-2 flex items-center justify-center rounded text-black cursor-pointer transition-all"
         @click="goToPage(i)"
         v-for="i in numberOfPages"
+        :key="i"
       >
         {{ i }}
       </p>
@@ -66,7 +67,6 @@
 </template>
 <script>
 import axios from "axios";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import Chart from "chart.js/auto";
 
